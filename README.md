@@ -1,1 +1,3 @@
-# lean-in-lowell
+# Lean at UMass Lowell
+
+
