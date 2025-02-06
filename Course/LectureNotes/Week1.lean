@@ -70,11 +70,20 @@ end MySection
 
 /- Definitions can use recursion -/
 
-def Factorial (n : ℕ) : ℕ :=
+def MyFactorial (n : ℕ) : ℕ :=
   if n = 0 then 1
-  else n * Factorial (n-1)
+  else n * MyFactorial (n-1)
 
-/- One can also use a `match` expression -/
+#eval MyFactorial 4
+
+/- One can also use a `match` expression (somewhat preferable here) -/
+
+def Factorial (n : ℕ) : ℕ :=
+  match n with
+  | Nat.zero => 1
+  | Nat.succ n => (n + 1) * Factorial n
+
+#eval Factorial 4
 
 /- Theorems can be introduced using `theorem` -/
 
