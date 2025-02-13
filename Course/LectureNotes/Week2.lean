@@ -57,7 +57,7 @@ example : ∀ m : ℤ, ∃ n, n - m = 3 := by
 #eval 3-5
 #eval (3:ℤ)-5
 
--- In Lean every arithmetic operations are defined
+-- In Lean arithmetic operations are defined
 -- for all inputs using `junk values`
 -- when the operation is undefined
 #eval 1/0
