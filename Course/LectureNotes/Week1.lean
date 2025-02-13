@@ -173,7 +173,8 @@ example (a b c d : ℝ) (h : a + b = c) (h' : 2 * b + d = a) (h'': d + a = a + c
 
 -- In longer proofs we can create our own auxiliary lemmas
 --@[local simp] -- we can register our own `simp` lemmas
-lemma two_plus_one_eq_three : (2:ℝ) + 1 = 3 := by norm_num -- closes goals involving numerical computation
+lemma two_plus_one_eq_three : (2:ℝ) + 1 = 3 := by
+  norm_num -- "normalizes" numbers (capable of some numerical simplifications)
 
 --ring
 

@@ -30,3 +30,9 @@ Instructions for homework:
 * To submit your homework, commit&push your changes to your fork of this repository. 
 * I'll only grade after the due date passed, so don't worry about committing partial progress.
 * Feedback will be private.
+
+# Outline
+
+Week 1: Rewriting, calculations         (MIL Ch. 1, 2)
+Week 2: Logic                           (MIL Ch. 3)
+Week 3: Sets and Functions              (MIL Ch. 4)

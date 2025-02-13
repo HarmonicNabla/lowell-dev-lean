@@ -18,8 +18,8 @@ that we need to be able to handle:
   - Disjunctions `∨` (type `\or`)
   - Negations `¬` (type `\not`)
 
-We need to learn how to deal when each of these
-appears in the goal or in a hypothesis
+We need to learn how to deal with each of these
+when they appear in the goal or in a hypothesis
 (introduction and elimination rules).
 
 -/
