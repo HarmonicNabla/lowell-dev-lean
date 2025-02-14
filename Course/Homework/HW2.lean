@@ -12,6 +12,8 @@ Optional: Do all the problems in MIL Ch. 3.1-3.5
 
 -/
 
+namespace HW
+
 /- Eliminate all `sorry`s. All tactics are allowed. -/
 
 example : ∀ n : ℕ, (∃ m, m > n) ∨ 0 = 1 := by
@@ -94,3 +96,5 @@ lemma drinkers_principle (drinks : β → Prop) : ∃ a, drinks a → ∀ b, dri
     -- Since `b` doesn't drink, the desired implication is true by the `principle of explosion` (also known as `ex falso quodlibet`).
     -- Hint: Use the `contradiction` tactic.
     sorry
+
+end HW
