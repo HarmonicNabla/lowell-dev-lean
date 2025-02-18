@@ -1,5 +1,7 @@
 import Course.Common
 
+set_option linter.unusedTactic false
+
 /-
 Today: Sets and Functions
 
@@ -8,6 +10,8 @@ Recommended reading: MIL Ch. 4
 -/
 
 /- # Sets -/
+
+namespace Course
 
 section Sets
 
@@ -90,19 +94,17 @@ example : x ∈ A \ B ↔ x ∈ A ∧ x ∉ B := by rfl
 #check mem_diff
 
 example : A ∪ B = B ∪ A := by
-  ext x
+  ext
   constructor
-  · intro hx
-    rcases hx with h'|h'
-    · right
-      assumption
-    · left
-      assumption
+  · rintro (_ | _)
+    · right; assumption
+    · left; assumption
   · sorry
   -- simp [or_comm]
 
+/- We can use `simp` & `tauto` to automate a lot of the legwork -/
 example : A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C) := by
-  ext x
+  ext
   simp
   tauto
 
@@ -121,6 +123,10 @@ example (h : A ∩ B = ∅) : x ∈ A → x ∉ B := by
 
 /- Universal set -/
 example : x ∈ Set.univ ↔ True := by rfl
+
+/- Let's do one more example on foot (without `simp` / `tauto`). -/
+example : A \ B ∪ B = B ∪ A := by
+  sorry
 
 end Sets
 
@@ -160,12 +166,9 @@ example : y ∈ f '' s ↔ ∃ x ∈ s, f x = y := by rfl
 example : f '' s ∪ f '' t = f '' (s ∪ t) := by
   ext y
   constructor
-  · simp
-    rintro (⟨x, hx, hx'⟩|⟨x, hx, hx'⟩)
-    · use x
-      exact ⟨Or.inl hx, hx'⟩
-    · use x
-      exact ⟨Or.inr hx, hx'⟩
+  · rintro (⟨x, hx, hx'⟩|⟨x, hx, hx'⟩)
+    · use x; exact ⟨Or.inl hx, hx'⟩
+    · use x; exact ⟨Or.inr hx, hx'⟩
   · sorry
     -- simp
     -- rintro x (hx|hx) hx'
@@ -192,6 +195,47 @@ example : f ⁻¹' (u ∩ v) = f ⁻¹' u ∩ f ⁻¹' v := by
 #check Injective f
 #check Surjective f
 #check Bijective f
+
+variable {γ : Type*} {g : β → γ}
+
+example (hf : Injective f) (hg : Injective g): Injective (g ∘ f) := by
+  sorry
+
+--variable {α β : Type*} [Inhabited α]
+
+open Classical
+
+variable [Inhabited α]
+
+#check (default : α) -- Inhabitated types provide a default element
+#eval (default : ℕ)
+
+#check Nonempty -- Compare `Inhabitated` to `Nonempty`
+
+/- Let us do a slightly more involved example -/
+example : (∃ f : α → β, Injective f) ↔ ∃ g : β → α, Surjective g := by
+  constructor
+  · -- Let `f` be injective
+    rintro ⟨f, hf⟩
+    -- Then define `g y` to be `x` such that `f x = y` if `y` is in the range of `f`, and any element otherwise
+    -- Note here we use Lean's version of the axiom of choice
+    #check Classical.choice
+    -- We can introduce local definitions using `let`
+    let g : β → α := sorry
+    -- To show that `g` is surjective it suffices to show `g (f x) = x` for every `x`.
+
+    -- `g (f x) = x` holds because `f` is injective
+    #check dif_pos
+    #check Classical.choose_spec
+    sorry
+  · -- Let `g` be surjective.
+    rintro ⟨g, hg⟩
+    -- Define `f x` to be an element `y` such that `g y = x` (exists because `g` is surjective)
+    let f : α → β := sorry
+    -- To show that `f` is injective, let `x, x'` such that `f x = f' x`.
+
+    -- Then `x = g (f x) = g (f x') = x'` by definition of `g`.
+    sorry
 
 open Real
 
@@ -225,3 +269,5 @@ example : range exp = {x | 0 < x} := by
 
 
 end Functions
+
+end Course

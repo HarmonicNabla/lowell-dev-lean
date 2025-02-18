@@ -1,3 +1,3 @@
-# Lean at UMass Lowell
+### Lean at UMass Lowell
 
 
