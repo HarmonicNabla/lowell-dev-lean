@@ -23,7 +23,7 @@ open Set
 #check Set -- A set is represented in Lean by a function from the type of elements to `Prop`
 
 /- We can define sets in Lean using familiar syntax -/
-def oddNumbers : Set ℕ := { n | Odd n }
+def oddNumbers : Set ℕ := { n : ℕ | Odd n }
 
 /- Type `∈` by `\in` -/
 #check Membership.mem
@@ -32,10 +32,11 @@ def oddNumbers : Set ℕ := { n | Odd n }
 example: n ∈ oddNumbers ↔ Odd n := by rfl
 
 example : 7 ∈ oddNumbers := by
-  change Odd 7  -- `change` allows us to change the goal into anything that is definitionally equal to it
+  change ∃ k, 7 = 2*k+1  -- `change` allows us to change the goal into anything that is definitionally equal to it
                 -- (can usually be omitted)
+  --unfold Odd
   use 3
-  rfl
+  -- rfl
 
 /- A shorter way to write this proof -/
 example : 7 ∈ oddNumbers := ⟨3, by rfl⟩
@@ -43,13 +44,22 @@ example : 7 ∈ oddNumbers := ⟨3, by rfl⟩
 /- There is also `∉` (type `\notin`)-/
 example : 2 ∉ oddNumbers := by
   change ¬ Odd 2
-  sorry
+  exact Nat.not_odd_iff.mpr rfl
+
+#check Nat.not_odd_iff.mpr
 
 /- Two sets are equal if they have the same elements.
   This is called *extensionality* and we can invoke this principle using the tactic `ext` -/
 example : oddNumbers = {n | ∃ k, n = k + k + 1 } := by
   ext n
-  constructor <;> {
+  constructor
+  -- · rintro ⟨k, hk⟩
+  --   use k
+  --   simp [hk, two_mul]
+  -- · rintro ⟨k, hk⟩
+  --   use k
+  --   simp [hk, two_mul]
+  <;> {
     rintro ⟨k, hk⟩
     use k
     simp [hk, two_mul]
@@ -63,16 +73,21 @@ example : A ⊆ B ↔ ∀ x, x ∈ A → x ∈ B := by rfl
   Type `⊆` using `\subset`
 -/
 example : oddNumbers ⊆ { n | n ≥ 1} := by
-  -- change ∀ n, Odd n → n ≥ 1
-  intro n hn
+  --change ∀ n, Odd n → n ≥ 1
+  rintro n ⟨k, hk⟩
+  -- change n ≥ 1
   dsimp       -- simplify using only definitional equality
-  obtain ⟨k, hk⟩ := hn
-  sorry
+  -- obtain ⟨k, hk⟩ := hn
+  rw [hk]
+  exact Nat.le_add_left 1 (2 * k)
+
+#check subset_trans -- slightly different definition
 
 example : A ⊆ B ∧ B ⊆ C → A ⊆ C := by
-  -- rintro ⟨h, h'⟩ _ ha -- `rintro` can introduce hypotheses and deconstruct them at the same time
-  -- exact h' (h ha)
-  sorry
+  -- tauto
+  rintro ⟨h, h'⟩ a ha -- `rintro` can introduce hypotheses and deconstruct them at the same time
+  -- have : a ∈ B := h ha
+  exact h' (h ha)
 
 /- Unions
   Type `∪` using `\un` -/
@@ -95,17 +110,18 @@ example : x ∈ A \ B ↔ x ∈ A ∧ x ∉ B := by rfl
 
 example : A ∪ B = B ∪ A := by
   ext
-  constructor
-  · rintro (_ | _)
+  constructor <;> {
+    rintro (_ | _)
     · right; assumption
     · left; assumption
-  · sorry
+  }
+  -- ext
   -- simp [or_comm]
 
 /- We can use `simp` & `tauto` to automate a lot of the legwork -/
 example : A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C) := by
   ext
-  simp
+  simp? -- `simp?` asks Lean to tell us what `simp` lemmas were used
   tauto
 
 /- Empty set
@@ -113,20 +129,29 @@ example : A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C) := by
  -/
 example : x ∈ (∅ : Set α) ↔ False := by rfl
 
-#check Set.ext_iff
+#check Set.ext_iff -- useful when set equality appears as hypothesis
 
 example (h : A ∩ B = ∅) : x ∈ A → x ∉ B := by
-  intro ha
-  simp [Set.ext_iff] at h
-  exact h x ha
-  --simp_all [Set.ext_iff] -- `simp_all` repeatedly simplifies goal and hypotheses until no further simplification is possible
+  -- intro ha
+  -- simp [Set.ext_iff] at h
+  -- exact h x ha
+  simp_all [Set.ext_iff] -- `simp_all` repeatedly simplifies goal and hypotheses until no further simplification is possible
 
 /- Universal set -/
 example : x ∈ Set.univ ↔ True := by rfl
 
 /- Let's do one more example on foot (without `simp` / `tauto`). -/
 example : A \ B ∪ B = B ∪ A := by
-  sorry
+  ext x
+  constructor
+  · rintro (⟨_, _⟩ | _)
+    · right; assumption
+    · left; assumption
+  · rintro (h | h)
+    · right; assumption
+    · by_cases h' : x ∈ B
+      · right; assumption
+      · left; exact ⟨h, h'⟩
 
 end Sets
 
@@ -169,11 +194,10 @@ example : f '' s ∪ f '' t = f '' (s ∪ t) := by
   · rintro (⟨x, hx, hx'⟩|⟨x, hx, hx'⟩)
     · use x; exact ⟨Or.inl hx, hx'⟩
     · use x; exact ⟨Or.inr hx, hx'⟩
-  · sorry
-    -- simp
-    -- rintro x (hx|hx) hx'
-    -- · left; use x
-    -- · right; use x
+  · simp
+    rintro x (hx|hx) hx'
+    · left; use x
+    · right; use x
 
 example : f '' s ∪ f '' t = f '' (s ∪ t) := by
   aesop
@@ -188,7 +212,7 @@ example : x ∈ f ⁻¹' u ↔ f x ∈ u := by rfl
 #check mem_preimage
 
 example : f ⁻¹' (u ∩ v) = f ⁻¹' u ∩ f ⁻¹' v := by
-  sorry
+  exact preimage_inter
 
 /- Properties of functions -/
 
@@ -199,7 +223,11 @@ example : f ⁻¹' (u ∩ v) = f ⁻¹' u ∩ f ⁻¹' v := by
 variable {γ : Type*} {g : β → γ}
 
 example (hf : Injective f) (hg : Injective g): Injective (g ∘ f) := by
-  sorry
+  intro x y h
+  -- have := hg h
+  -- have := hf this
+  -- assumption
+  exact hf (hg h)
 
 --variable {α β : Type*} [Inhabited α]
 
@@ -209,6 +237,7 @@ variable [Inhabited α]
 
 #check (default : α) -- Inhabitated types provide a default element
 #eval (default : ℕ)
+#eval (default : ℝ)
 
 #check Nonempty -- Compare `Inhabitated` to `Nonempty`
 
@@ -220,35 +249,71 @@ example : (∃ f : α → β, Injective f) ↔ ∃ g : β → α, Surjective g :
     -- Then define `g y` to be `x` such that `f x = y` if `y` is in the range of `f`, and any element otherwise
     -- Note here we use Lean's version of the axiom of choice
     #check Classical.choice
+    #check Classical.choose
     -- We can introduce local definitions using `let`
-    let g : β → α := sorry
+    let g : β → α := fun y ↦ if h : y ∈ range f then choose h else default
+    #check ite
+    #check dite
+    use g
     -- To show that `g` is surjective it suffices to show `g (f x) = x` for every `x`.
-
+    intro x
+    use f x
     -- `g (f x) = x` holds because `f` is injective
     #check dif_pos
     #check Classical.choose_spec
-    sorry
+    have h : f x ∈ range f := by use x
+    have : g (f x) = choose h := dif_pos h
+    have : f (choose h) = f x := choose_spec h
+    have : choose h = x := hf this
+    calc
+      g (f x) = choose h := by assumption
+      _ = x := by assumption
   · -- Let `g` be surjective.
     rintro ⟨g, hg⟩
     -- Define `f x` to be an element `y` such that `g y = x` (exists because `g` is surjective)
-    let f : α → β := sorry
+    #check hg x
+    let f : α → β := fun x ↦ choose (hg x)
+    use f
     -- To show that `f` is injective, let `x, x'` such that `f x = f' x`.
-
+    intro x x' h
     -- Then `x = g (f x) = g (f x') = x'` by definition of `g`.
-    sorry
+    calc
+      _ = g (f x) := by rw [choose_spec (hg x)]
+      _ = g (f x') := by rw [h]
+      _ = x' := by rw [choose_spec (hg x')]
 
 open Real
 
 example : Bijective (fun x : ℝ ↦ 2 * x) := by
-  sorry
+  constructor
+  · intro x y h
+    dsimp at h
+    #check mul_left_cancel₀
+    refine mul_left_cancel₀ ?_ h    -- `refine` is like `exact` except you can use holes `?_` that will become new subgoals
+    norm_num
+    -- exact mul_left_cancel₀ (by norm_num) h
+  · intro y
+    dsimp
+    use (y/2)
+    ring
 
 /- Lean knows about standard functions and their properties -/
 #check exp
+#check Complex.exp
 #check sin
 #check cos
 #check log    /- In Lean `log x` is defined for all real numbers `x`. If `x ≤ 0` it uses a junk value. -/
 
+#check exp_add
+#check exp_zero
+#check exp_neg
+#check exp_pos
+
 example : log 1 = 0 := log_one
+
+example : log 0 = 0 := log_zero
+
+#check log_mul
 
 example : Injective exp := exp_injective
 
@@ -258,15 +323,18 @@ example : InjOn (fun x : ℝ ↦ x^2) {x | 0 ≤ x} := by
   intro x hx y hy h
   dsimp at *    -- simplify using only definitional equality at goal and all hypotheses
   calc
-    _ = √(x^2) := by rw [sqrt_sq_eq_abs, abs_of_nonneg hx]
+    _ = √(x^2) := by rw [sqrt_sq_eq_abs, abs_of_nonneg hx]    -- `\sqrt`
     _ = √(y^2) := by rw [h]
     _ = _      := by rw [sqrt_sq_eq_abs, abs_of_nonneg hy]
 
 #check range
 
-example : range exp = {x | 0 < x} := by
-  sorry
+example : range exp = {y | 0 < y} := by
+  exact range_exp
 
+#check Icc 0 1    -- closed interval `[0, 1]`
+#check Ioo 0 1    -- open interval `(0, 1)`
+#check Ioc 0 1    -- half-open interval `(0, 1]`
 
 end Functions
 
