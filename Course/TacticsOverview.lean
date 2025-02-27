@@ -36,5 +36,13 @@ contradiction -- Tries to close goal by deriving a contradiction from hypotheses
 tauto       -- Tries to prove logical tautologies
 aesop       -- Tries to prove goal automatically using various methods (good for tautologies)
 
+ext
+rintro
+dsimp
+change
+simp_all
+
+induction
+gcongr
 
 -/
