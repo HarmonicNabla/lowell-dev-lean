@@ -49,5 +49,6 @@ field_simp  -- Can deal with division, tries to clear denominators; often useful
 norm_cast   -- Tries to normalize casts (coercions) by pulling them out of expressions
 push_cast   -- Tries push coercions into expressions.
 
+infer_instance -- Synthesize a typeclass instance using typeclass inference
 
 -/

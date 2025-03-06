@@ -294,8 +294,14 @@ instance [DecidableEq V] : DecidableRel (completeGraph V).adj :=
 #eval edges' (K 4) -- Now this works
 
 -- We can also compute other graph properties, e.g. degree of a vertex
+
+-- By default Lean tries to compile some code that can be used to actually evaluate functions
+-- we define on explicit inputs, but here this will fail because `Set.ncard` is generally not computable,
+-- if we mark definitions with `noncomputable` Lean will not attempt to compile code
 noncomputable def degree' [DecidableRel G.adj] (v : V) : ℕ := { w | G.adj v w }.ncard
 
+-- In this case we can adjust the definition slightly to make the compilation go through
+-- (the degree of a vertex in a finite graph with computable adjacencies is computable)
 def degree [DecidableRel G.adj] (v : V) : ℕ := ({ w | G.adj v w } : Finset V).card
 
 #eval degree (K 4) 0
