@@ -37,3 +37,6 @@ Instructions for homework:
 * Week 1: Rewriting, calculations         (MIL Ch. 1, 2)
 * Week 2: Logic                           (MIL Ch. 3)
 * Week 3: Sets and Functions              (MIL Ch. 4)
+* Week 4: Induction and Coercions         (MIL Ch. 5.2)
+* Week 5: Structures and Typeclasses      (MIL Ch. 6, 7)
+   

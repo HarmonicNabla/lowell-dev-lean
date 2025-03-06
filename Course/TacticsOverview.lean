@@ -36,13 +36,18 @@ contradiction -- Tries to close goal by deriving a contradiction from hypotheses
 tauto       -- Tries to prove logical tautologies
 aesop       -- Tries to prove goal automatically using various methods (good for tautologies)
 
-ext
-rintro
-dsimp
-change
-simp_all
+ext         -- Use the principle of extensionality
+rintro      -- A recursive version of `intro`, similar to `rcases`
+dsimp       -- Definitional simplifier; simplifies only using certain facts that are true by `rfl`
+change      -- Change the goal to a given definitionally equal expression
+simp_all    -- Iteratively applies `simp * at *` until no more progress is made
 
-induction
-gcongr
+induction   -- Apply an induction principle
+induction'  -- Alternate syntax for the induction tactic
+gcongr      -- Useful for inequalities; tries to match the same pattern on both sides recursively
+field_simp  -- Can deal with division, tries to clear denominators; often useful before using `ring`
+norm_cast   -- Tries to normalize casts (coercions) by pulling them out of expressions
+push_cast   -- Tries push coercions into expressions.
+
 
 -/
