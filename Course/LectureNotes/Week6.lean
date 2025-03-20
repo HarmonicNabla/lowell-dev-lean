@@ -1,5 +1,4 @@
 import Course.Common
-import Mathlib
 
 set_option linter.unusedTactic false
 
@@ -25,7 +24,7 @@ def seqHasLimitAtInf (a : ℕ → ℝ) (L : ℝ) : Prop := ∀ ε > 0, ∃ N, �
 variable {f : ℝ → ℝ}
 
 /- lim_{x → x₀} f(x) = L -/
-def fctHasLimitAt (f : ℝ → ℝ) (x₀ : ℝ) (L : ℝ) : Prop := ∀ ε > 0, ∃ δ > 0, ∀ x, |x - x₀| < δ → |f x - f x₀| < ε
+def fctHasLimitAt (f : ℝ → ℝ) (x₀ : ℝ) (L : ℝ) : Prop := ∀ ε > 0, ∃ δ > 0, ∀ x, |x - x₀| < δ → |f x - L| < ε
 
 /-
 
