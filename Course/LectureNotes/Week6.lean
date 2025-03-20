@@ -18,12 +18,14 @@ section
 
 /- There are many different notions of limit -/
 
-def seqHasLimitAtInf (a : ℕ → ℝ) (L : ℝ) : Prop := sorry
+/- Let's define `lim_{n → ∞} a n = L` -/
+/- E.g. `lim_{n → ∞} 1 / n = 0` -/
+def seqHasLimitAtInf (a : ℕ → ℝ) (L : ℝ) : Prop := ∀ ε > 0, ∃ N, ∀ n ≥ N, |a n - L| < ε
 
-/- Consider a function -/
 variable {f : ℝ → ℝ}
 
-def fctHasLimitAt (f : ℝ → ℝ) (x0 : ℝ) (L : ℝ) : Prop := sorry
+/- lim_{x → x₀} f(x) = L -/
+def fctHasLimitAt (f : ℝ → ℝ) (x₀ : ℝ) (L : ℝ) : Prop := ∀ ε > 0, ∃ δ > 0, ∀ x, |x - x₀| < δ → |f x - f x₀| < ε
 
 /-
 
@@ -41,7 +43,7 @@ as well as lemmas to translate between notions appropriately.
 
 Obviously we don't want to do it that way.
 
-Instead, Lean uses *filters*
+Instead, Lean uses *filters* to unify all these slightly different definitions
 
  -/
 
@@ -79,23 +81,25 @@ example (T : α → β) : Filter α → Filter β := fun F : Filter α ↦ Filte
 -- This allows us to define limits
 #check Tendsto
 
-#check Tendsto f (𝓝 x₀) (𝓝 L)   -- `lim_{x → x₀} f = L`
+#check Tendsto f (𝓝 x₀) (𝓝 L)   -- `lim_{x → x₀} f(x) = L`
 
-#check Tendsto f atTop (𝓝 L) -- Limit at infinity: `lim_{x → ∞} f = L`
+#check Tendsto f atTop (𝓝 L) -- Limit at infinity: `lim_{x → ∞} f(x) = L`
 
-#check Tendsto f (𝓝 x₀) atTop -- Limit tending to infinity: `lim_{x → x₀} f = ∞`
+#check Tendsto f (𝓝 x₀) atTop -- Limit tending to infinity: `lim_{x → x₀} f(x) = ∞`
 
-#check Tendsto f (𝓝[≤] x₀) (𝓝 L) -- Left-sided limit: `lim_{x → x₀-} f = L`
+#check Tendsto f (𝓝[≤] x₀) (𝓝 L) -- Left-sided limit: `lim_{x → x₀-} f(x) = L`
 
 #check 𝓝[<] x₀
 #check 𝓝[>] x₀
 #check 𝓝[≠] x₀
 
+/- lim_{n → ∞} a n = ∞ -/
 example (a : ℕ → ℝ) : Tendsto a atTop atTop ↔ ∀ M, ∃ N, ∀ n ≥ N, a n ≥ M := by
-  sorry
+  exact tendsto_atTop_atTop
 
+/- lim_{n → ∞} a n = L -/
 example (a : ℕ → ℝ) (L : ℝ) : Tendsto a atTop (𝓝 L) ↔ ∀ ε > 0, ∃ N, ∀ n ≥ N, |a n - L| < ε := by
-  sorry
+  exact Metric.tendsto_atTop
 
 -- Recall metric spaces
 #check MetricSpace
@@ -107,11 +111,29 @@ example (a : ℕ → ℝ) (L : ℝ) : Tendsto a atTop (𝓝 L) ↔ ∀ ε > 0, �
 example (x y : ℝ) : dist x y = |x - y| := by rfl
 
 #synth Dist ℕ
+example (n m : ℕ) : dist n m = |(n : ℝ) - m| := by rfl
 
 #check Metric.tendsto_atTop
 
+#check Nat.floor
+
+/- Let's prove that `lim_{n → ∞} 1 / (1 + n) = 0` -/
 example : Tendsto (fun n : ℕ ↦ (1 : ℝ) / (1 + n)) atTop (𝓝 0) := by
-  sorry
+  apply Metric.tendsto_atTop.mpr
+  intro ε hε -- Let `ε > 0`.
+  -- Want: `1 / (1 + N) < ε` -> Want `N > 1 / ε - 1` <-> `N ≥ 1 / ε`
+  let N := ⌊1 / ε⌋₊ -- Let `N = ⌊1 / ε⌋₊`
+  use N -- Nat.floor type using `\lfloor`, `\rfloor`
+  intro n hn -- Let `n ≥ N`
+  calc
+    _ = (1 : ℝ) / (1 + n) := by
+      simp
+      positivity -- `positivity` tries to use assumptions and lemmas to prove goals of the form `0 < _`, `0 ≤ _`
+    _ ≤ 1 / (1 + N) := by gcongr
+    _ < 1 / (1 / ε) := by gcongr; rw [add_comm]; exact Nat.lt_floor_add_one (1 / ε)
+    _ = ε := by simp
+
+-- #loogle Nat.cast (Nat.floor _)
 
 variable {a : ℕ → ℝ}
 
@@ -119,34 +141,46 @@ variable {a : ℕ → ℝ}
 
 #check Filter.Eventually
 
+-- For `sufficiently large n` we have `a n ≥ 10`
 example : (∀ᶠ n in atTop, a n ≥ 10) ↔ ∃ N, ∀ n ≥ N, a n ≥ 10 := by
-  sorry
+  exact eventually_atTop
 
 variable {b : ℕ → ℝ}
 
 example (h1 : ∀ᶠ n in atTop, a n ≥ b n + 3) (h2 : ∀ᶠ n in atTop, b n ≥ 7) : ∀ᶠ n in atTop, a n ≥ 10 := by
   -- Attempting to follow the proof we might write on paper we would do something like this:
   apply eventually_atTop.mpr
-  sorry
+  obtain ⟨N₁, hN₁⟩ := eventually_atTop.mp h1 -- Let `N₁` be such that for `n ≥ N₁`: `a n ≥ b n + 3`
+  obtain ⟨N₂, hN₂⟩ := eventually_atTop.mp h2 -- Let `N₂` be such that for `n ≥ N₂`: `b n ≥ 7`
+  use max N₁ N₂
+  intro n hn -- Let `n ≥ max N₁ N₂`
+  have h₁ := hN₁ n (le_of_max_le_left hn)
+  have h₂ := hN₂ n (le_of_max_le_right hn)
+  -- could use `calc` here, or:
+  linarith only [h₁, h₂]
 
 #check Eventually.of_forall -- From `Filter.univ`
 #check Eventually.mono -- Compare with `Filter.sets_of_superset`
 #check Eventually.and -- Compare with `Filter.inter_sets`
 
 example (h1 : ∀ᶠ n in atTop, a n ≥ b n + 3) (h2 : ∀ᶠ n in atTop, b n ≥ 7) : ∀ᶠ n in atTop, a n ≥ 10 := by
-  -- Instead we should try to work directly with properties of filters
-  sorry
+  -- The argument above is much shorter if we work directly with properties of filters
+  apply (h1.and h2).mono
+  rintro n ⟨h₁, h₂⟩
+  linarith only [h₁, h₂]
 
--- `filter_upwards` tactic
+-- The `filter_upwards` tactic can apply filter properties for us
 example (h1 : ∀ᶠ n in atTop, a n ≥ b n + 3) (h2 : ∀ᶠ n in atTop, b n ≥ 7) : ∀ᶠ n in atTop, a n ≥ 10 := by
-  sorry
+  filter_upwards [h1, h2] with n h₁ h₂
+  linarith only [h₁, h₂]
+
 
 -- We can also formalize expressions such as `arbitrarily large` or `infinitely often` using filters
 #check Filter.Frequently -- Written using `∃ᶠ`
 
 -- "There exist arbitrarily large `n` such that `a n ≥ 10`" or "There are infinitely many `n` such that `a n ≥ 10`"
 example : (∃ᶠ n in atTop, a n ≥ 10) ↔ ∀ N, ∃ n ≥ N, a n ≥ 10 := by
-  sorry
+  exact frequently_atTop
 
 end
 
