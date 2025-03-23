@@ -39,4 +39,6 @@ Instructions for homework:
 * Week 3: Sets and Functions              (MIL Ch. 4)
 * Week 4: Induction and Coercions         (MIL Ch. 5.2)
 * Week 5: Structures and Typeclasses      (MIL Ch. 6, 7)
-   
+* Week 6: Limits and filters              (MIL Ch. 10.1)
+* Week 7: Derivatives                     (MIL Ch. 11.1)
+    

@@ -51,4 +51,7 @@ push_cast   -- Tries push coercions into expressions.
 
 infer_instance -- Synthesize a typeclass instance using typeclass inference
 
+positivity    -- Tries to prove a goal of the form `0 < _` or `0 ≤ _`
+filter_upwards -- Applies filter properties and hypotheses to make progress on proving filter membership goals.
+
 -/
