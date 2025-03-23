@@ -89,18 +89,18 @@ instance : CommMonoid' (Point2 ℤ) where
     ext
     -- unfold mul
     -- dsimp
-    exact mul_assoc _ _ _
-    exact mul_assoc _ _ _
+    · exact mul_assoc _ _ _
+    · exact mul_assoc _ _ _
   mul_one' := by
     intro a
     ext
-    exact mul_one _
-    exact mul_one _
+    · exact mul_one _
+    · exact mul_one _
   mul_comm' := by
     intro a b
     ext
-    exact mul_comm _ _
-    exact mul_comm _ _
+    · exact mul_comm _ _
+    · exact mul_comm _ _
 
 -- Now Lean knows that `Point2 ℤ` is a commutative monoid
 -- The `#synth` command can be used to find explicit instances of typeclasses
