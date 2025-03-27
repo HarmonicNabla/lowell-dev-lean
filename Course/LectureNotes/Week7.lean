@@ -53,7 +53,7 @@ example (x : ℝ) : deriv (fun y ↦ 2 * cos y + 5 * sin y) x = -2 * sin x + 5 *
 #check deriv_pow -- Derivative of `f x = x ^ n`
 
 #check deriv_mul -- Product rule
-example (x : ℝ) : deriv (fun y ↦ y * sin y) x = sin x + x * cos x := by simp
+example (x : ℝ) : (deriv (fun var ↦ var * sin var)) x = sin x + x * cos x := by simp
 
 #check deriv_div -- Quotient rule
 #check deriv_comp -- Chain rule
@@ -70,30 +70,42 @@ example (x : ℝ) : deriv (fun y ↦ y * sin y) x = sin x + x * cos x := by simp
 example : deriv log 0 = 0 := by rw [deriv_log, inv_zero]
 
 -- But of course `log |⬝|` is not differentiable at `0` and Lean knows that:
-example (x : ℝ) : DifferentiableAt ℝ log x ↔ x ≠ 0 := by sorry
+example (x : ℝ) : DifferentiableAt ℝ log x ↔ x ≠ 0 := by exact differentiableAt_log_iff
 
 -- The absolute value function is not differentiable at `0`
 example : ¬ DifferentiableAt ℝ (fun y : ℝ ↦ |y|) 0 := by
-  sorry
+  exact not_differentiableAt_abs_zero
 
 example (x : ℝ) : deriv (fun y ↦ y ^ 2 + exp y) x = 2 * x + exp x := by
   -- `simp` can do this too
   apply HasDerivAt.deriv
   apply HasDerivAt.add
-  · convert hasDerivAt_pow _ _ -- Note the goal doesn't match `hasDerivAt_pow` exactly
+  ·
+    -- have aux : 2 * x = 2 * x ^ (2 - 1) := by simp
+    -- rw [aux]
+    -- exact hasDerivAt_pow _ _
+    convert hasDerivAt_pow _ _ -- Note the goal doesn't match `hasDerivAt_pow` exactly
                                -- `convert` is a useful tactic for such cases: it will try
                                -- to pattern match the given term against the goal and
                                -- generate subgoals for the differences
-    sorry
+    ring
   · exact hasDerivAt_exp _
 
+#check HasDerivAt.const_mul
 example (x : ℝ) : deriv (fun y ↦ sin (2 * y) + 3 * exp (5 * y)) x = cos (2 * x) * 2 + 15 * exp (5 * x) := by
   -- `simp` fails here
   apply HasDerivAt.deriv
   refine HasDerivAt.add ?_ ?_ -- `refine` is like `exact` except one can use `?_` for missing terms resulting in corresponding subgoals
-  · convert HasDerivAt.comp x (hasDerivAt_sin _) (HasDerivAt.const_mul (2 : ℝ) <| hasDerivAt_id _) using 2
-    sorry
-  · sorry
+  · convert HasDerivAt.comp x (hasDerivAt_sin _) (HasDerivAt.const_mul (2 : ℝ) (hasDerivAt_id _)) using 2
+    exact (mul_one _).symm
+    -- convert HasDerivAt.comp x (hasDerivAt_sin _) (HasDerivAt.const_mul (2 : ℝ) <| hasDerivAt_id _) using 2
+    -- sorry
+  · convert HasDerivAt.const_mul (3 : ℝ) _ using 1
+    rotate_left -- Change order of subgoals
+    exact 5 * exp (5 * x) -- A goal doesn't have to be a proposition!
+    · convert HasDerivAt.exp (HasDerivAt.const_mul (5 : ℝ) (hasDerivAt_id _)) using 1
+      simp; ring
+    · ring
 
 end Derivatives
 
@@ -113,10 +125,19 @@ variable {a b : ℝ}
 #check Ico a b  -- half-closed interval `[a, b)`
 #check Ioi a    -- interval `(a, ∞)`
 #check Ici a    -- interval `[a, ∞)`
-#check Iio b    -- interval `(∞, b)`
-#check Iic b    -- interval `(∞, b]`
+#check Iio b    -- interval `(-∞, b)`
+#check Iic b    -- interval `(-∞, b]`
+
+example (x : ℝ) : x ∈ Ioo a b ↔ a < x ∧ x < b := by rfl
 
 #check NNReal -- The non-negative real numbers `[0, ∞)` as a `subtype`
+#check Ici 0 -- `[0, ∞)` as a `Set ℝ`
+
+structure MyNNReal where
+  val : ℝ
+  nonneg : 0 ≤ val
+
+example : MyNNReal := ⟨5, by positivity⟩
 
 -- Subtypes are the type-analogues of subsets:
 -- A subtype bundles a value together with a property
@@ -152,7 +173,7 @@ example (x₀ : ℝ) : ContinuousAt f x₀ ↔ Tendsto f (𝓝 x₀) (𝓝 (f x�
 #check continuous_iff_continuousAt -- A function is continuous iff it is continuous at every point
 
 -- The square root function is continuous on `[0, ∞)`
-example : ContinuousOn sqrt (Ici 0) := by
+example : ContinuousOn sqrt (Ici 0) := by -- `√x`
   -- In Lean, `sqrt x` is defined as `0` for `x ≤ 0`, so it's actually continuous everywhere
   apply continuousOn_of_forall_continuousAt
   exact fun x _ ↦ continuous_iff_continuousAt.mp continuous_sqrt x
@@ -165,12 +186,18 @@ example : Continuous (fun y ↦ exp (y ^ 2 * cos y)) := by
   all values between `f a` and `f b`. -/
 #check intermediate_value_Icc
 
-theorem exists_eq_zero_of_continuous (a b : ℝ) (hf : ContinuousOn f (Icc a b))
-    (hab : a ≤ b) (ha : f a ≤ 0) (hb : 0 ≤ f b) : ∃ x ∈ Icc a b, f x = 0 := by
-  sorry
+theorem exists_eq_zero_of_continuous {a b : ℝ} (hf : ContinuousOn f (Icc a b))
+    (hab : a ≤ b) (ha : f a ≤ 0) (hb : 0 ≤ f b) : ∃ x ∈ Icc a b, f x = 0 := intermediate_value_Icc hab hf ⟨ha, hb⟩
+
 
 example : ∃ x ∈ Icc (-1) 1, x - sin x = 0 := by
-  sorry
+  apply exists_eq_zero_of_continuous
+  · fun_prop
+  · norm_num
+  all_goals { -- `all_goals` applies the same tactic(s) to all remaining goals
+    norm_num
+    exact sin_le_one _
+  }
 
 end Continuity
 
