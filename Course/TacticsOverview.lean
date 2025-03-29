@@ -57,5 +57,7 @@ filter_upwards -- Applies filter properties and hypotheses to make progress on p
 refine        -- Like `exact` except one can use `?_` for missing terms resulting in corresponding subgoals
 convert       -- Like `refine`, `exact`, except provided term doesn't have to match goal exactly; attempts to create subgoals by pattern matching
 fun_prop      -- Automatically proves some function properties, e.g. continuity, differentiability
+rotate_left, rotate_right -- Change current goal.
+all_goals     -- Apply tactics to all goals.
 
 -/
