@@ -54,4 +54,8 @@ infer_instance -- Synthesize a typeclass instance using typeclass inference
 positivity    -- Tries to prove a goal of the form `0 < _` or `0 ≤ _`
 filter_upwards -- Applies filter properties and hypotheses to make progress on proving filter membership goals.
 
+refine        -- Like `exact` except one can use `?_` for missing terms resulting in corresponding subgoals
+convert       -- Like `refine`, `exact`, except provided term doesn't have to match goal exactly; attempts to create subgoals by pattern matching
+fun_prop      -- Automatically proves some function properties, e.g. continuity, differentiability
+
 -/
