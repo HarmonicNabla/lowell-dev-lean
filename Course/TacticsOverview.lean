@@ -33,6 +33,7 @@ by_cases    -- Create two subgoals with additional assumption that a given propo
 unfold      -- Unfold a definition
 push_neg    -- Push logical negation into conclusion
 contradiction -- Tries to close goal by deriving a contradiction from hypotheses
+by_contra   -- Proof by contradiction (assume negation of goal and change goal to `False`).
 tauto       -- Tries to prove logical tautologies
 aesop       -- Tries to prove goal automatically using various methods (good for tautologies)
 
@@ -59,5 +60,9 @@ convert       -- Like `refine`, `exact`, except provided term doesn't have to ma
 fun_prop      -- Automatically proves some function properties, e.g. continuity, differentiability
 rotate_left, rotate_right -- Change current goal.
 all_goals     -- Apply tactics to all goals.
+
+simp_rw       -- (Repeated) rewrite under binders.
+conv          -- Enter conversion mode.
+congr, congr! -- Recursively apply congruence.
 
 -/

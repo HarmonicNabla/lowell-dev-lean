@@ -100,8 +100,8 @@ example : ∫ x in (0:ℝ)..π, (cos (x / 2)) ^ 2 = π / 2 := by
 
 -- Another way to rewrite under binders is *conversion mode*: `conv` tactic
 example : ∫ x in (0:ℝ)..π, (cos (x / 2)) ^ 2 = π / 2 := by
-  conv =>
-    enter [1, 1, x] -- Traverse to the desired location in the syntax tree
+  conv => -- Enter conversion mode
+    enter [1, 1, x] -- Navigate to the desired location in the syntax tree
     rw [cos_sq] -- Now we can rewrite / simplify
     ring_nf
   field_simp

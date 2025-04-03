@@ -3,6 +3,7 @@ import Mathlib.Util.Delaborators
 import Mathlib.Analysis.SpecialFunctions.Integrals
 
 set_option linter.unusedTactic false
+set_option linter.unusedVariables false
 
 namespace Course
 
