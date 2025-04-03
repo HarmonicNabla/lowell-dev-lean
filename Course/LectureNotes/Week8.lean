@@ -1,7 +1,4 @@
 import Course.Common
-import Mathlib.Analysis.SpecialFunctions.Integrals
-
-set_option linter.unusedTactic false
 
 /-
 Today: Integrals
@@ -18,7 +15,6 @@ open intervalIntegral Interval
 /-
 In Lean, integrals are defined using *measure theory*, but we'll not assume or need
 any knowledge of measure theory here. -/
-noncomputable abbrev length := @MeasureTheory.volume ℝ inferInstance
 
 /- We'll only work with integrals of functions on intervals -/
 #check intervalIntegral
@@ -48,10 +44,12 @@ example : ∫ x in (0:ℝ)..2 * π, sin x = 0 := by
 
 -- As usual the interval is defined for all integrands, but it equals the junk value 0 if the integrand is not integrable
 #check IntervalIntegrable
+#check ContinuousOn.intervalIntegrable
+example : IntervalIntegrable (fun x ↦ sin (x * exp (x ^ 2))) length a b := by
+  sorry
 
 #check integral_add
 #check integral_const_mul
-#check ContinuousOn.intervalIntegrable
 example (h : ℝ) : (∫ x in (0:ℝ)..h, 2 * x + x ^ 3) = h ^ 2 + h ^ 4 / 4 := by
   sorry
 
@@ -73,14 +71,31 @@ example (hcont : Continuous f) (x : ℝ): deriv (fun x ↦ ∫ t in (0:ℝ)..x, 
 #check integral_hasStrictDerivAt_left
 
 #check integral_mul_deriv_eq_deriv_mul -- Integration by parts
-#check integral_comp_smul_deriv -- Integration by substitution
-
-open Finset
 
 -- Rewriting under binders: `simp_rw`
+#check cos_sq
+example : ∫ x in (0:ℝ)..π, (cos (x / 2)) ^ 2 = sorry := by
+  -- rw [cos_sq] -- doesn't work
+  sorry
 
+-- Another way to rewrite under binders is *conversion mode*: `conv` tactic
+example : ∫ x in (0:ℝ)..π, (cos (x / 2)) ^ 2 = sorry := by
+  sorry
 
+-- Can also do this using `congr` / `congr!`
+example : ∫ x in (0:ℝ)..π, (cos (x / 2)) ^ 2 = sorry := by
+  sorry
+
+open Finset in
 example {F : ℕ → ℝ → ℝ} (hF : ∀ n, Continuous (F n)) (N : ℕ) (a b : ℝ) : ∑ n ∈ range N, ∫ x in a..b, F n x = ∫ x in a..b, (∑ n ∈ range N, F n x) := by
   sorry
+
+#check integral_comp_mul_deriv -- Integration by substitution
+#check hasDerivAt_mul_const
+lemma integral_comp_const_mul (hf : Continuous f) (r : ℝ) (hr : 0 < r) : ∫ x in a..b, f (r * x) = (1 / r) * ∫ x in (r * a)..(r * b), f x := by
+  calc
+    _ = (1 / r) * ∫ x in a..b, f (r * x) * r := by sorry
+    _ = _ := by sorry
+
 
 end Course.Week8
