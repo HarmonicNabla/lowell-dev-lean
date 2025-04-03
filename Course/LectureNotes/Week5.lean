@@ -1,8 +1,6 @@
 import Course.Common
 import Mathlib.Combinatorics.SimpleGraph.Maps
 
-set_option linter.unusedTactic false
-
 /-
 Today: Structures and typeclasses
 

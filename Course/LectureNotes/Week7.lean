@@ -1,8 +1,5 @@
 import Course.Common
-import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
 import Mathlib.Analysis.Calculus.Deriv.Abs
-
-set_option linter.unusedTactic false
 
 /-
 Today: Derivatives
