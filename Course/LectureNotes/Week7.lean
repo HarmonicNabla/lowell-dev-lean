@@ -1,5 +1,6 @@
 import Course.Common
-import Mathlib
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
+import Mathlib.Analysis.Calculus.Deriv.Abs
 
 set_option linter.unusedTactic false
 
@@ -202,3 +203,5 @@ example : ∃ x ∈ Icc (-1) 1, x - sin x = 0 := by
 end Continuity
 
 end Course.Week7
+
+#min_imports

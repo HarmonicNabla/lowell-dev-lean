@@ -1,6 +1,7 @@
 import Course.Common
 import Course.LectureNotes.Week5
 
+set_option linter.unusedTactic false
 /-
 
 Homework sheet 5
