@@ -1,7 +1,5 @@
 import Course.Common
-import Mathlib.Analysis.SpecialFunctions.Integrals
 
-set_option linter.unusedTactic false
 /-
 
 Homework sheet 8
@@ -15,6 +13,6 @@ Optional: Do all the problems in MIL Ch. 12.1
 
 namespace HW8
 
-
+-- TBD
 
 end HW8
