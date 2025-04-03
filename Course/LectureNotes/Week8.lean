@@ -87,12 +87,12 @@ example : ∫ x in (0:ℝ)..π, (cos (x / 2)) ^ 2 = sorry := by
   sorry
 
 open Finset in
-example {F : ℕ → ℝ → ℝ} (hF : ∀ n, Continuous (F n)) (N : ℕ) (a b : ℝ) : ∑ n ∈ range N, ∫ x in a..b, F n x = ∫ x in a..b, (∑ n ∈ range N, F n x) := by
+theorem sum_integral {F : ℕ → ℝ → ℝ} (hF : ∀ n, Continuous (F n)) (N : ℕ) (a b : ℝ) : ∑ n ∈ range N, ∫ x in a..b, F n x = ∫ x in a..b, (∑ n ∈ range N, F n x) := by
   sorry
 
 #check integral_comp_mul_deriv -- Integration by substitution
 #check hasDerivAt_mul_const
-lemma integral_comp_const_mul (hf : Continuous f) (r : ℝ) (hr : 0 < r) : ∫ x in a..b, f (r * x) = (1 / r) * ∫ x in (r * a)..(r * b), f x := by
+theorem integral_comp_const_mul (hf : Continuous f) (r : ℝ) (hr : 0 < r) : ∫ x in a..b, f (r * x) = (1 / r) * ∫ x in (r * a)..(r * b), f x := by
   calc
     _ = (1 / r) * ∫ x in a..b, f (r * x) * r := by sorry
     _ = _ := by sorry
