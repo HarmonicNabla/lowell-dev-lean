@@ -3,7 +3,7 @@ import Course.LectureNotes.Week8
 /-
 
 Homework sheet 8
-Due Apr 10 10am
+Due Apr 17 10am
 
 All problems are mandatory unless stated otherwise.
 
