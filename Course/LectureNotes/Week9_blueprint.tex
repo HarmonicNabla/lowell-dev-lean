@@ -1,0 +1,74 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath, amssymb, amsthm}
+
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}
+\newtheorem{lem}[thm]{Lemma}
+
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+\begin{document}
+
+\section{The Riemann-Lebesgue lemma}
+
+We prove a (weak) version of the Riemann-Lebesgue lemma.
+
+\begin{thm}\label{tendsto_integral_sin_mul}
+Let $f:[a,b]\to \mathbb{R}$ be continuously differentiable.
+Then 
+\[\int_a^b \sin(Rx) f(x)\,dx\]
+converges to $0$ as $R\to\infty$.
+\end{thm}
+
+To prove this result we first prove a lemma: 
+
+\begin{lem}\label{integral_sin_mul_decay}
+Let $f:[a,b]\to \mathbb{R}$ be continuously differentiable.
+Then there exists a constant $C\in (0,\infty)$ such that for every $R>0$
+\[\Big|\int_a^b \sin(Rx) f(x)\,dx\Big| \le C\cdot R^{-1}.\]
+\end{lem}
+
+\begin{proof}[Proof of Lemma]
+The idea is to use integrate $\sin(Rx)$ by parts to obtain the decaying factor of $R^{-1}$.
+Begin by rewriting
+\[ \int_a^b \sin(Rx) f(x)\,dx = \frac{-1}{R} \int_a^b \Big(\frac{d}{dx}\cos(Rx)\Big) f(x)\,dx \]
+Using integration by parts shows that this is equal to
+\[ \frac{-1}{R} (\cos(Rb)f(b) - \cos(Ra)f(a)) + \frac{1}{R} \int_a^b \cos(Rx) f'(x)\, dx. \]
+From this and by the triangle inequality and $|\cos(x)|\le 1$ we obtain
+\[ \Big|\int_a^b \sin(Rx) f(x)\,dx\Big| \le R^{-1} \Big(|f(b)| + |f(a)| + \int_a^b |f'(x)|\,dx\Big). \]  
+The claim follows with 
+\[ C = |f(b)| + |f(a)| + \int_a^b |f'(x)|\,dx. \]
+% Since $f$ is contiuous on $[a,b]$ there exists a constant $A\in (0,\infty)$ such that 
+% \[ |f(x)|\le A\quad\text{for all}\; x\in [a,b].\]
+% Since $f$ is continuously differentiable, $f'$ is continuous on $[a,b]$, so there exists a constant $B\in (0,\infty)$
+% such that 
+% \[ |f'(x)|\le B\quad\text{for all}\; x\in [a,b].\]
+% Therefore,
+% \[ |f(b)| + |f(a)| + \int_a^b |f'(x)|\,dx \le 2A + \int_a^b B\, dx = 2A + (b-a) B. \] 
+% and the claim follows with $C = 2A + (b-a)B$.
+\end{proof}
+
+\begin{proof}[Proof of Theorem \ref{tendsto_integral_sin_mul} using Lemma \ref{integral_sin_mul_decay}]
+By definition it suffices to prove that for every $\varepsilon>0$ there exists $M>0$ such that for all $R\ge M$ we have
+\begin{equation}\label{eqn:}
+\Big|\int_a^b \sin(Rx) f(x)\,dx\Big| < \varepsilon.
+\end{equation}
+Let $C\in (0,\infty)$ be the constant from Lemma \ref{integral_sin_mul_decay}. Then
+\begin{equation}
+    \Big|\int_a^b \sin(Rx) f(x)\,dx\Big| \le C\cdot R^{-1}
+\end{equation}
+Let $\varepsilon>0$ and set $M = 2 C \varepsilon^{-1}$. Suppose that $R\ge M$.
+Then
+\begin{equation}
+C\cdot R^{-1} \le C\cdot M^{-1} = \varepsilon / 2 < \varepsilon,
+\end{equation}
+as required.
+\end{proof}
+
+\begin{remark}
+The assumption that $f$ is continuously differentiable is for illustration purposes only (it can be relaxed to $f\in L^1$).
+\end{remark}
+
+\end{document}
