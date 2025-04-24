@@ -137,8 +137,11 @@ macro_rules | `(tactic|my_tactic) => `(tactic|constructor; my_tactic)
 example {α : Type} : ∀ x y : α, x = x ∧ y = y := by
   my_tactic
 
--- Fix this:
--- macro "continuous_integrable" : tactic => `(tactic|apply ContinuousOn.intervalIntegrable; fun_prop)
+macro "continuous_integrable" : tactic => `(tactic|focus (apply ContinuousOn.intervalIntegrable; fun_prop))
+
+open intervalIntegral Real in
+example : IntervalIntegrable (fun x : ℝ ↦ Real.sin (x ^ 2)) length 0 1 := by
+  continuous_integrable
 
 end TacticTest
 
