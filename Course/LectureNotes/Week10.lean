@@ -23,15 +23,17 @@ open Lean Meta Elab Tactic
 -- We can define our own notation in Lean
 namespace Test1
 
+#check_failure 𝕂
+
 scoped notation "𝕂" => ℝ
 
 #check 𝕂
 
 variable {a b : ℝ × ℝ}
 
-def my_prod : ℝ × ℝ := ⟨a.1 * b.1, a.2 + b.2⟩
+def my_prod : ℝ × ℝ := ⟨a.2 * b.1, a.1 * b.2⟩
 
-notation "≪" a "," b "≫" => a * b
+notation "≪" a "," b "≫" => my_prod (a := a) (b := b)
 
 #check ≪a,b≫
 
@@ -42,6 +44,8 @@ infix:65 " ⊕ " => HAdd.hAdd   -- `65` indicates operator precedence
 
 #check a ⊕ b
 #check a + b
+
+example : a + b = a ⊕ b := by rfl
 
 end Test1
 
@@ -107,23 +111,34 @@ def myTheorem: 1 ≠ 1 := by
 
 syntax "my_tactic" : tactic
 
+-- example : 1 = 1 := by
+--   my_tactic -- 'not implemented' error
+
 macro_rules | `(tactic|my_tactic) => `(tactic|rfl)
 
 example : 1 = 1 := by
   my_tactic
 
 -- We can define multiple `macro_rules`
+macro_rules | `(tactic|my_tactic) => `(tactic|assumption)
 
--- example {P : Prop} (h : P) : P := by
---   my_tactic
+example {P : Prop} (h : P) : P := by
+  my_tactic
 
 -- Macros are allowed to be recursive
 
--- example {α : Type} : ∀ x : α, x = x := by
---   my_tactic
+macro_rules | `(tactic|my_tactic) => `(tactic|intro; my_tactic)
 
--- example {α : Type} : ∀ x y : α, x = x ∧ y = y := by
---   my_tactic
+example {α : Type} : ∀ x : α, x = x := by
+  my_tactic
+
+macro_rules | `(tactic|my_tactic) => `(tactic|constructor; my_tactic)
+
+example {α : Type} : ∀ x y : α, x = x ∧ y = y := by
+  my_tactic
+
+-- Fix this:
+-- macro "continuous_integrable" : tactic => `(tactic|apply ContinuousOn.intervalIntegrable; fun_prop)
 
 end TacticTest
 
@@ -150,20 +165,37 @@ There are lots of different monads to allow different kinds of side effects.
 #check IO -- Monads always have type `Type → Type`
 
 -- Let us write a Lean version of the C program `void main() { printf("Hello World!"); }`
--- def main
+def main : IO Unit := do -- `do` notation is used to enter `imperative mode`
+  IO.println "Hello World!"
+  -- return
+
+#eval main
 
 -- an example with monadic return value
+def printAndReturnSum (a b : ℕ) : IO ℕ := do
+  let result := a + b
+  IO.println s!"The sum of a={a} and b={b} equals {result}" -- String formatting
+  return result
+
+#eval printAndReturnSum 1 5
 
 run_cmd do -- `run_cmd` can be used to execute code
   -- `logInfo` can be used to print a message in InfoView
-  logInfo m!"Hello World!"
+  logInfo "Hello World!"
   -- `let` is used to introduce local variables
-
+  let my_string := "Test"
   -- use `mut` to create a mutable local variable
-
+  let mut my_mutable_string := "A"
+  my_mutable_string := my_mutable_string ++ "BC"
+  logInfo my_mutable_string
   -- `dbg_trace` is another way to log a message used for debugging
-
+  dbg_trace my_mutable_string
   -- to "unpack" a monadic value use `←`
+  let result := printAndReturnSum 7 10 -- `result` is not of type `ℕ`, but of type `IO ℕ`
+  -- use `←` to unpack the monadic value and get the value of type `ℕ`
+  let result' ← result
+  logInfo s!"result = {result'}"
+
 
 /- In Lean, `Monad` is a typeclass that looks something like this: -/
 namespace MyMonad
@@ -190,6 +222,10 @@ that can be used to make ordinary output types `monadic`, i.e. bundling them wit
 
 -- Some important examples of monads:
 #check Option -- Wraps a value, or absence of a value ("none")
+
+#check Option.some 1
+#check Option.none
+
 #check Except String -- Monad for exception handling
 #check Id -- Identity monad that doesn't do anything, but allows us to use monadic API
 #check IO -- IO monad
@@ -204,14 +240,26 @@ that can be used to make ordinary output types `monadic`, i.e. bundling them wit
 -- As an example let us write a program that sums reciprocals of a list of natural numbers throwing an error when any of the numbers is zero
 
 def divide (n : ℕ) : Except String ℚ := -- Return `1 / n` or error when `n = 0`
-  sorry
+  match n with
+  | 0 => .error "Division by zero!"
+  | n + 1 => .ok (1 / (n + 1))
 
 -- `Except String` is a monad, so we can also use `do` notation to write this in imperative style
 def divide' (n : ℕ) : Except String ℚ := do
-  sorry
+  if n = 0 then
+    throw "Division by zero!"
+  return 1 / n
+
+#eval divide 0
+#eval divide' 5
 
 def sum_reciprocal (lst : List ℕ) : Except String ℚ := do
-  sorry
+  let mut total : ℚ := 0
+  for k in lst do
+    total := total + (← divide k)
+  return total
 
+#eval sum_reciprocal [1, 2, 3, 4]
+#eval sum_reciprocal [1, 0, 3, 4]
 
 end Course.Week10
