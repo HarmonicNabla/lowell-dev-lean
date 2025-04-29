@@ -2,7 +2,7 @@ import Course.Common
 import Lean
 
 /-
-Today: Metaprogramming
+Today: Macros and monads
 
 Lean can be used to extend its own syntax and semantics.
 In fact, much of Lean is written in Lean itself. Mathlib tactics are written in Lean.
