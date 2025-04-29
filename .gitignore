@@ -1,1 +1,6 @@
 /.lake
+*.fdb_latexmk
+*.aux
+*.log
+*.pdf
+*.synctex.gz
