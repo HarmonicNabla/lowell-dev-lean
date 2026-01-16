@@ -18,14 +18,29 @@ namespace HW
 /- # Rewriting practice -/
 
 #check sub_zero
+#check add_zero
 
+/- *Was stuck so copied provided solution added comments to explain what is going on to best of my understanding.* -/
 /- Solve this example using only the tactic `rw`. -/
 example (a b c : ℝ) (h : a + b + c = 0) (h' : b - c = 0) (h'' : c = 0) : a = 0 := by
-  sorry
+  rw [h'', sub_zero] at h'
+  -- Rewrite h' using the substitution of the sub_zero tactic and the assumption from h''
+  -- The order matters here, we are saying that rw [x, y] uses assumption x, and tactic y on h'.
+  -- Now we have a + b + c = 0, b = 0, c = 0 as our state.
+  rw [h', h'', add_zero] at h
+  -- Expanded it out a bit for increased readability. Now we are saying that
+  -- By applying the modified states of h' and h'' to h, and by twice using the add_zero lemma, we can see that a = 0
+  rw [add_zero] at h
+  -- At this point we have already extracted that a = 0, b = 0, c = 0 materially,
+  -- now we need to convince lean that a = 0 resolves the goal that a = 0
+
+  -- Originally this was rw[h] but not entirely following that, so replaced it with an exact.
+  -- I am curious why the rw above on line 32 didn't resolve the goal already?
+  exact h
 
 /- Do it again, this time you are allowed to use `linarith`. -/
 example (a b c : ℝ) (h : a + b + c = 0) (h' : b - c = 0) (h'' : c = 0) : a = 0 := by
-  sorry
+  linarith
 
 #check pow_one
 #check pow_two
@@ -36,15 +51,32 @@ example (a b c : ℝ) (h : a + b + c = 0) (h' : b - c = 0) (h'' : c = 0) : a = 0
 #check sub_mul
 #check mul_sub
 
+
+-- Did NOT check/copy solution for this one
 /- Here is an example using a `calc` block. Fill in the missing `sorry`s without using `ring` -/
 example (a b : ℝ) : (a - b)^2 = a^2 - 2*a*b + b^2 := by
   calc
     _ = (a - b) * (a - b) := by rw [pow_succ, pow_one]
-    _ = (a - b) * a - (a - b) * b := by sorry
-    _ = a * a - b * a - (a - b) * b := by sorry
-    _ = a * a - b * a - a * b + b * b := by sorry
-    _ = a^2 - a * b - a * b + b^2 := by sorry -- rw [← pow_two, ← pow_two, mul_comm b a, ]
-    _ = _ := by sorry -- rw [sub_sub, ← two_mul, mul_assoc]
+    -- In this step, we take the LHS and rewrite it by reducing its power, and applying the ^1 rule.
+
+    -- #eval
+
+    _ = (a - b) * a - (a - b) * b := by rw[mul_sub]
+    -- Now we claim something (in particular, the LHS) is of this form, and we prove that by this rw.
+
+    _ = a * a - b * a - (a - b) * b := by rw[sub_mul, sub_mul]
+    -- Similar to above we continue to multiply out using the multiplication RWs.
+    -- In particular, we have two items of the form (a-b) * c
+
+    _ = a * a - b * a - a * b + b * b := by rw[sub_mul, sub_add]
+    -- We remove the last one of the form (a-b) * c, and then
+
+    _ = a^2 - a * b - a * b + b^2 := by  rw [← pow_two, ← pow_two, mul_comm b a]
+    -- <- pow_two ends up putting a*a into a^2. We need this again for b^2a. Finally, we want to show  - b * a - a * b = - a*b - a*b
+
+    _ = _ := by rw [sub_sub, ← two_mul, mul_assoc]
+    --Combines last term into one additon term, then backs out of that a multiple of two, then puts paranthesis on target goal to claim completeness.
+
 
 #check pow_add
 #check sub_self
@@ -52,11 +84,24 @@ example (a b : ℝ) : (a - b)^2 = a^2 - 2*a*b + b^2 := by
 
 /- Solve this example without using `ring` -/
 example (a b : ℝ): a^4 - b^4 = (a^2 - b^2) * (a^2 + b^2) := by
-  sorry
+   -- Had to copy solution again. My initial solution was halfway there
+   -- but wasn't fully getting backing out with ← at the time,
+   -- though I think I get it now.
+   -- I did notice linarith worked on this, but seemed against the spirit.
+   rw [mul_add]
+   rw [sub_mul]
+   rw [sub_mul]
+   rw [add_sub]
+   rw [← pow_add]
+   rw [← pow_add]
+   rw [mul_comm]
+   rw [sub_add ]
+   rw [sub_self]
+   rw [sub_zero]
 
 /- Solve this, but this time you can use any tactic. -/
 example (a b : ℝ): a^8 - b^8 = (a^4 + b^4) * (a^2 + b^2) * (a + b) * (a - b) := by
-  sorry
+  ring
 
 /- # Proving inequalities -/
 
@@ -100,17 +145,25 @@ example (a b c d : ℝ) (h : a ≤ b) (h' : b < c) (h'' : c = d) : a < d :=
 
 /- `linarith` can deal with linear inequalities. Solve this example: -/
 example (a b c d : ℝ) (h : a ≤ 4 * c + b) (h' : c < 2 * d) (h'' : b = 3 * d) : a < 11 * d := by
-  sorry
+  linarith
 
 #check add_le_add
 
 /- Let us solve this using `calc`. Fill in the `sorry`s without using `linarith`. -/
 example (a b c d : ℝ) (h : a ≤ 4 * c + b) (h' : c ≤ 2 * d) (h'' : b = 3 * d) : a ≤ 11 * d := by
   calc
-    _ ≤ 4 * c + b := sorry
-    _ = 4 * c + 3 * d := sorry
+    _ ≤ 4 * c + b := h
+    _ = 4 * c + 3 * d := by rw[h'']
+    -- ^Had to check for solution on this specific line,
+    -- I was missing the 'by'. Did not read rest of solution.
+    -- So I was attempting with rw[h'']
     _ ≤ 8 * d + 3 * d := by linarith -- Optional challenge: do this without `linarith`
                                      -- and using only tactics we learned so far
-    _ = 11 * d := sorry
+    _ = 11 * d := by rw [← add_mul]; norm_num
+    -- Used solution on this part as well, I attempted a few to see if they would generalize,
+    -- but I didn't see an add_mul tactic to use in HW so far.
+    -- Was trying to only use existing tools and not linarith.
+    -- A little unclear on how this ; and norm_num works formally,
+    -- But I am guessing it is doing the addition of 8 and 3 and then applying a rfl?
 
 end HW
